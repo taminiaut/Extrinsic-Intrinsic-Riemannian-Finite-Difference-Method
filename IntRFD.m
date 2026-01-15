@@ -30,9 +30,9 @@ while fcalls <= evalMax
                 g0 = M.lincomb(x0,1,g0,(fSample-f0)/h,E{j});
             end
 
-            fval(fcalls:min(fcalls+d,N)) = f0;
+            fval(fcalls:min(fcalls+d,evalMax)) = f0;
             fcalls = fcalls + d;
-            if fcalls > N
+            if fcalls > evalMax
                 break
             end
         end
@@ -43,7 +43,7 @@ while fcalls <= evalMax
             fNew = f(xNew);
             fval(fcalls) = f0;
             fcalls = fcalls + 1;
-            if fcalls > N
+            if fcalls > evalMax
                 break
             end
 

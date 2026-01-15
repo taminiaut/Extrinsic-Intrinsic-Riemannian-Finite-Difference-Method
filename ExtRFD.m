@@ -25,14 +25,14 @@ while fcalls <= evalMax
         if computeFiniteDiff
             g0 = M.zerovec(x0);
             for j = 1:d
-                xSample = superlincomb(x0,1,x0,h,M.tangent2ambient(x0,E{j}),problem); % Linear combination in the ambient space
+                xSample = superlincomb(x0,1,x0,h,M.tangent2ambient(x0,E{j}),M); % Linear combination in the ambient space
                 fSample = f(xSample);
                 g0 = M.lincomb(x0,1,g0,(fSample-f0)/h,E{j});
             end
 
-            fval(fcalls:min(fcalls+d,N)) = f0;
+            fval(fcalls:min(fcalls+d,evalMax)) = f0;
             fcalls = fcalls + d;
-            if fcalls > N
+            if fcalls > evalMax
                 break
             end
         end
@@ -43,7 +43,7 @@ while fcalls <= evalMax
             fNew = f(xNew);
             fval(fcalls) = f0;
             fcalls = fcalls + 1;
-            if fcalls > N
+            if fcalls > evalMax
                 break
             end
 
