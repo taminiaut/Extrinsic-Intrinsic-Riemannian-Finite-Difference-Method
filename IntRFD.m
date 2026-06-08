@@ -1,4 +1,4 @@
-function [x, fval] = IntRFD(f, M, x0, evalMax, tol)
+function [x, fval, nretr] = IntRFD(f, M, x0, evalMax, tol)
 
 % Set seed for reproducibility
 rng(0)
@@ -8,9 +8,13 @@ tau = 1e2; % Initial value tau0
 d = M.dim(); % Dimension of the manifold
 innerIterMax = 500; % Maximum number of line search iterations
 
-fval = zeros(1,evalMax);
+fval = zeros(1,evalMax); % Function value
+nretr = zeros(1,evalMax); % Number of retractions
+
 f0 = f(x0);
 fcalls = 1;
+rcalls = 0;
+
 fval(fcalls) = f0;
 
 while fcalls <= evalMax
@@ -31,7 +35,9 @@ while fcalls <= evalMax
             end
 
             fval(fcalls:min(fcalls+d,evalMax)) = f0;
+            nretr(fcalls:min(fcalls+d,evalMax)) = rcalls;
             fcalls = fcalls + d;
+            rcalls = rcalls + d;
             if fcalls > evalMax
                 break
             end
@@ -42,7 +48,9 @@ while fcalls <= evalMax
             xNew = M.retr(x0,g0,-1/sigma);
             fNew = f(xNew);
             fval(fcalls) = f0;
+            nretr(fcalls) = rcalls;
             fcalls = fcalls + 1;
+            rcalls = rcalls + 1;
             if fcalls > evalMax
                 break
             end

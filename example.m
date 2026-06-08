@@ -14,6 +14,8 @@ a.M1 = stiefelfactory(n, r);
 a.M2 = stiefelfactory(m, r);
 M = productmanifold(a);
 
+fprintf('Dimension of the manifold is %d.\n',M.dim())
+
 A = randn(n, m);
 svdarray = svd(A);
 fstar = sum(svdarray(1:r));
@@ -25,19 +27,27 @@ tol = 1e-5;
 evalMax = 100*M.dim();
 
 % Call the derivative-free Riemannian optimization methods
-[x1, fval1] = ExtRFD(f,M,x0,evalMax,tol);
-[x2, fval2] = IntRFD(f,M,x0,evalMax,tol);
+[x1, fval1, nretr1] = ExtRFD(f,M,x0,evalMax,tol);
+[x2, fval2, nretr2] = IntRFD(f,M,x0,evalMax,tol);
 
-fprintf('Final function value for the method ExtRFD is %e\n',f(x1))
-fprintf('Final function value for the method IntRFD is %e\n',f(x2))
+fprintf('Final function value for the method ExtRFD is %e.\n',f(x1))
+fprintf('Final function value for the method IntRFD is %e.\n',f(x2))
 
-figure
 simplexGradient = (1:evalMax)/M.dim();
+
+subplot(1,2,1);
 plot(simplexGradient,fval1,'-',simplexGradient,fval2,'--')
 
-title("The methods have the same behaviour but ExtRFD requires less retractions")
 xlabel("Number of simplex gradients")
 ylabel("Function value")
+yscale('log')
+legend('ExtRFD','IntRFD')
+
+subplot(1,2,2);
+plot(simplexGradient,nretr1,'-',simplexGradient,nretr2,'--')
+
+xlabel("Number of simplex gradients")
+ylabel("Number of retractions")
 yscale('log')
 legend('ExtRFD','IntRFD')
 

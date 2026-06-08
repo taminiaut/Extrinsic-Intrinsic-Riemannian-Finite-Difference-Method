@@ -1,4 +1,4 @@
-function [x, fval] = ExtRFD(f, M, x0, evalMax, tol)
+function [x, fval, nretr] = ExtRFD(f, M, x0, evalMax, tol)
 
 % Set seed for reproducibility
 rng(0)
@@ -8,10 +8,15 @@ tau = 1e2; % Initial value tau0
 d = M.dim(); % Dimension of the manifold
 innerIterMax = 500; % Maximum number of line search iterations
 
-fval = zeros(1,evalMax);
+fval = zeros(1,evalMax); % Function value
+nretr = zeros(1,evalMax); % Number of retractions
+
 f0 = f(x0);
 fcalls = 1;
+rcalls = 0;
+
 fval(fcalls) = f0;
+
 
 while fcalls <= evalMax
 
@@ -25,12 +30,13 @@ while fcalls <= evalMax
         if computeFiniteDiff
             g0 = M.zerovec(x0);
             for j = 1:d
-                xSample = superlincomb(x0,1,x0,h,M.tangent2ambient(x0,E{j}),M); % Linear combination in the ambient space
+                xSample = ambientlincomb(x0,1,x0,h,M.tangent2ambient(x0,E{j}),M); % Linear combination in the ambient space
                 fSample = f(xSample);
                 g0 = M.lincomb(x0,1,g0,(fSample-f0)/h,E{j});
             end
 
             fval(fcalls:min(fcalls+d,evalMax)) = f0;
+            nretr(fcalls:min(fcalls+d,evalMax)) = rcalls;
             fcalls = fcalls + d;
             if fcalls > evalMax
                 break
@@ -42,7 +48,9 @@ while fcalls <= evalMax
             xNew = M.retr(x0,g0,-1/sigma);
             fNew = f(xNew);
             fval(fcalls) = f0;
+            nretr(fcalls) = rcalls;
             fcalls = fcalls + 1;
+            rcalls = rcalls + 1;
             if fcalls > evalMax
                 break
             end
@@ -50,6 +58,7 @@ while fcalls <= evalMax
             % Check the sufficient decrease condition
             if f0 - fNew >= 1/(4*sigma) * M.norm(x0,g0)^2
                 fval(fcalls) = fNew;
+                nretr(fcalls) = rcalls;
                 x0 = xNew;
                 f0 = fNew;
                 sigma = sigma/2;
